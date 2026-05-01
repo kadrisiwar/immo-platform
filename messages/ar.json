@@ -1,0 +1,76 @@
+{
+  "nav": {
+    "search": "بحث",
+    "login": "تسجيل الدخول",
+    "register": "إنشاء حساب",
+    "logout": "تسجيل الخروج"
+  },
+  "home": {
+    "hero_title": "اعثر على منزلك المثالي",
+    "hero_subtitle": "منصة الإيجار طويل الأمد في تونس",
+    "search_placeholder": "ابحث بالمدينة أو الحي أو العنوان...",
+    "annonces_count": "{count} إعلان متاح",
+    "see_annonces": "عرض الإعلانات",
+    "publish": "نشر إعلان"
+  },
+  "filters": {
+    "all_cities": "كل المدن",
+    "all_types": "كل الأنواع",
+    "price_max": "أقصى سعر",
+    "reset": "إعادة تعيين",
+    "results": "{count} إعلان وجد"
+  },
+  "annonce": {
+    "rooms": "{count} غرف",
+    "see_details": "عرض التفاصيل",
+    "furnished": "مفروش",
+    "per_month": "/ الشهر",
+    "request_visit": "طلب زيارة",
+    "contact": "التواصل مع المالك",
+    "location": "الموقع",
+    "description": "الوصف",
+    "equipment": "المعدات"
+  },
+  "auth": {
+    "username": "اسم المستخدم",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "confirm_password": "تأكيد كلمة المرور",
+    "phone": "الهاتف",
+    "role": "أنا",
+    "owner": "مالك",
+    "tenant": "مستأجر",
+    "login_btn": "تسجيل الدخول",
+    "register_btn": "إنشاء حساب",
+    "forgot": "نسيت كلمة المرور؟",
+    "no_account": "ليس لديك حساب؟",
+    "have_account": "لديك حساب؟"
+  },
+  "dashboard": {
+    "overview": "لوحة التحكم",
+    "my_annonces": "إعلاناتي",
+    "visits": "الزيارات",
+    "contracts": "العقود",
+    "messages": "الرسائل",
+    "favorites": "المفضلة",
+    "profile": "ملفي الشخصي",
+    "users": "المستخدمون",
+    "statistics": "الإحصائيات",
+    "disputes": "النزاعات"
+  },
+  "common": {
+    "loading": "جارٍ التحميل...",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "view": "عرض",
+    "active": "نشط",
+    "suspended": "موقوف",
+    "pending": "قيد الانتظار",
+    "signed": "موقّع",
+    "expired": "منتهي",
+    "generate": "إنشاء",
+    "download": "تحميل"
+  }
+}

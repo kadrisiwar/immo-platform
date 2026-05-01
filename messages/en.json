@@ -1,0 +1,76 @@
+{
+  "nav": {
+    "search": "Search",
+    "login": "Sign in",
+    "register": "Sign up",
+    "logout": "Logout"
+  },
+  "home": {
+    "hero_title": "Find your ideal home",
+    "hero_subtitle": "The long-term rental platform in Tunisia",
+    "search_placeholder": "Search by city, district, title...",
+    "annonces_count": "{count} listings available",
+    "see_annonces": "Browse listings",
+    "publish": "Post a listing"
+  },
+  "filters": {
+    "all_cities": "All cities",
+    "all_types": "All types",
+    "price_max": "Max price",
+    "reset": "Reset",
+    "results": "{count} listings found"
+  },
+  "annonce": {
+    "rooms": "{count} rooms",
+    "see_details": "View details",
+    "furnished": "Furnished",
+    "per_month": "/ month",
+    "request_visit": "Request a visit",
+    "contact": "Contact owner",
+    "location": "Location",
+    "description": "Description",
+    "equipment": "Amenities"
+  },
+  "auth": {
+    "username": "Username",
+    "email": "Email",
+    "password": "Password",
+    "confirm_password": "Confirm password",
+    "phone": "Phone",
+    "role": "I am a",
+    "owner": "Owner",
+    "tenant": "Tenant",
+    "login_btn": "Sign in",
+    "register_btn": "Sign up",
+    "forgot": "Forgot password?",
+    "no_account": "Don't have an account?",
+    "have_account": "Already have an account?"
+  },
+  "dashboard": {
+    "overview": "Dashboard",
+    "my_annonces": "My listings",
+    "visits": "Visits",
+    "contracts": "Contracts",
+    "messages": "Messages",
+    "favorites": "Favorites",
+    "profile": "My profile",
+    "users": "Users",
+    "statistics": "Statistics",
+    "disputes": "Disputes"
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "active": "Active",
+    "suspended": "Suspended",
+    "pending": "Pending",
+    "signed": "Signed",
+    "expired": "Expired",
+    "generate": "Generate",
+    "download": "Download"
+  }
+}

@@ -30,6 +30,7 @@ export function useConversations() {
       const res = await api.get("/messagerie/");
       return res.data as Conversation[];
     },
+    refetchInterval: 10000, // كل 10 secondes
   });
 }
 
@@ -41,7 +42,7 @@ export function useConversation(id: number) {
       return res.data as Conversation;
     },
     enabled: !!id,
-    refetchInterval: 5000,
+    refetchInterval: 3000,
   });
 }
 
@@ -63,4 +64,21 @@ export function useEnvoyerMessage() {
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
     },
   });
+}
+export function useCreerConversation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (annonceId: number) => {
+      const res = await api.post("/messagerie/creer/", { annonce: annonceId });
+      return res.data as Conversation;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["conversations"] });
+    },
+  });
+}
+
+export function useNonLusTotal() {
+  const { data: conversations = [] } = useConversations();
+  return conversations.reduce((total, conv) => total + conv.non_lus, 0);
 }

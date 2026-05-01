@@ -1,41 +1,19 @@
 "use client";
 
-import { FileText, CheckCircle } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { FileText, CheckCircle, Download } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useContratsLocataire, useSignerContrat } from "@/hooks/use-contrats";
 
 type ContratStatus = "en_attente" | "signe" | "expire";
 
 function StatusBadge({ status }: { status: ContratStatus }) {
   const map = {
-    en_attente: {
-      label: "En attente",
-      cls: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
-    },
-    signe: {
-      label: "Signé",
-      cls: "bg-green-100 text-green-800 hover:bg-green-100",
-    },
-    expire: {
-      label: "Expiré",
-      cls: "bg-gray-100 text-gray-800 hover:bg-gray-100",
-    },
+    en_attente: { label: "En attente de signature", cls: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100" },
+    signe:      { label: "Signé",                   cls: "bg-green-100 text-green-800 hover:bg-green-100" },
+    expire:     { label: "Expiré",                  cls: "bg-gray-100 text-gray-800 hover:bg-gray-100" },
   };
   return <Badge className={map[status]?.cls}>{map[status]?.label}</Badge>;
 }
@@ -44,26 +22,41 @@ export default function LocataireContratsPage() {
   const { data: contrats = [], isLoading } = useContratsLocataire();
   const signer = useSignerContrat();
 
-  if (isLoading)
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Chargement...</div>
-      </div>
-    );
+  const downloadPdf = async (id: number) => {
+    try {
+      const token = localStorage.getItem("access_token");
+      const res   = await fetch(`http://localhost:8000/api/contrats/${id}/pdf/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const blob  = await res.blob();
+      const url   = URL.createObjectURL(blob);
+      const a     = document.createElement("a");
+      a.href      = url;
+      a.download  = `contrat_${id}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert("Erreur téléchargement PDF");
+    }
+  };
+
+  if (isLoading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="text-muted-foreground">Chargement...</div>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Mes contrats</h1>
-        <p className="text-sm text-muted-foreground">
-          Vos contrats de location
-        </p>
+        <p className="text-sm text-muted-foreground">Vos contrats de location</p>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>Tous mes contrats</CardTitle>
-          <CardDescription>Signez vos contrats en attente</CardDescription>
+          <CardDescription>Signez et téléchargez vos contrats</CardDescription>
         </CardHeader>
         <CardContent>
           {contrats.length === 0 ? (
@@ -80,39 +73,33 @@ export default function LocataireContratsPage() {
                   <TableHead>Période</TableHead>
                   <TableHead>Loyer</TableHead>
                   <TableHead>Statut</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {contrats.map((c) => (
                   <TableRow key={c.id}>
-                    <TableCell className="font-medium">
-                      {c.annonce_titre}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {c.proprietaire_nom}
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {c.date_debut} → {c.date_fin}
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {c.loyer_mensuel} DT
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge status={c.status} />
-                    </TableCell>
+                    <TableCell className="font-medium">{c.annonce_titre}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{c.proprietaire_nom}</TableCell>
+                    <TableCell className="text-sm">{c.date_debut} → {c.date_fin}</TableCell>
+                    <TableCell className="font-medium">{c.loyer_mensuel} DT</TableCell>
+                    <TableCell><StatusBadge status={c.status} /></TableCell>
                     <TableCell className="text-right">
-                      {c.status === "en_attente" && (
-                        <Button
-                          size="sm"
-                          style={{ backgroundColor: "#16a34a", color: "white" }}
-                          onClick={() => signer.mutate(c.id)}
-                          disabled={signer.isPending}
-                        >
-                          <CheckCircle className="mr-2 h-4 w-4" />
-                          Signer
+                      <div className="flex justify-end gap-2">
+                        {c.status === "en_attente" && (
+                          <Button
+                            size="sm"
+                            style={{ backgroundColor: "#16a34a", color: "white" }}
+                            onClick={() => signer.mutate(c.id)}
+                            disabled={signer.isPending}
+                          >
+                            <CheckCircle className="mr-1 h-3 w-3" /> Signer
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="icon" onClick={() => downloadPdf(c.id)}>
+                          <Download className="h-4 w-4" />
                         </Button>
-                      )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

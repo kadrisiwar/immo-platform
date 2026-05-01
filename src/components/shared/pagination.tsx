@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -10,18 +8,23 @@ interface PaginationProps {
   onChange: (page: number) => void;
 }
 
-export function Pagination({
-  page,
-  total,
-  perPage = 9,
-  onChange,
-}: PaginationProps) {
+export function Pagination({ page, total, perPage = 9, onChange }: PaginationProps) {
   const totalPages = Math.ceil(total / perPage);
-
   if (totalPages <= 1) return null;
 
+  const pages: number[] = [];
+  for (let i = 1; i <= totalPages; i++) {
+    if (
+      i === 1 ||
+      i === totalPages ||
+      (i >= page - 1 && i <= page + 1)
+    ) {
+      pages.push(i);
+    }
+  }
+
   return (
-    <div className="flex items-center justify-center gap-2 mt-8 flex-wrap">
+    <div className="flex items-center justify-center gap-2 mt-8">
       <Button
         variant="outline"
         size="icon"
@@ -31,39 +34,21 @@ export function Pagination({
         <ChevronLeft className="h-4 w-4" />
       </Button>
 
-      {[...Array(Math.min(totalPages, 5))].map((_, i) => {
-        let pageNum = i + 1;
-        if (totalPages > 5 && page > 3) {
-          pageNum = page - 3 + i;
-          if (pageNum > totalPages) return null;
-        }
-        return (
+      {pages.map((p, i) => (
+        <span key={p}>
+          {i > 0 && pages[i - 1] !== p - 1 && (
+            <span className="px-1 text-muted-foreground">...</span>
+          )}
           <Button
-            key={pageNum}
-            variant={page === pageNum ? "default" : "outline"}
+            variant={page === p ? "default" : "outline"}
             size="icon"
-            onClick={() => onChange(pageNum)}
+            onClick={() => onChange(p)}
             className="h-9 w-9"
           >
-            {pageNum}
+            {p}
           </Button>
-        );
-      })}
-
-      {totalPages > 5 && page < totalPages - 2 && (
-        <span className="text-muted-foreground">...</span>
-      )}
-
-      {totalPages > 5 && page < totalPages - 2 && (
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => onChange(totalPages)}
-          className="h-9 w-9"
-        >
-          {totalPages}
-        </Button>
-      )}
+        </span>
+      ))}
 
       <Button
         variant="outline"

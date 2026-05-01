@@ -1,9 +1,24 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["192.168.227.47", "localhost", "*.ngrok.io"],
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          { key: "Access-Control-Allow-Origin",  value: "*" },
+          { key: "Access-Control-Allow-Methods", value: "GET,POST,PUT,PATCH,DELETE,OPTIONS" },
+          { key: "Access-Control-Allow-Headers", value: "Content-Type, Authorization" },
+          { key: "ngrok-skip-browser-warning",   value: "true" },
+        ],
+      },
+    ];
+  },
   images: {
-    domains: ["localhost", "192.168.227.47"],
+    remotePatterns: [
+      { protocol: "https", hostname: "*.ngrok-free.app" },
+      { protocol: "http",  hostname: "localhost" },
+    ],
   },
 };
 

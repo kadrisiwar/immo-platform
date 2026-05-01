@@ -1,0 +1,76 @@
+{
+  "nav": {
+    "search": "Rechercher",
+    "login": "Se connecter",
+    "register": "S'inscrire",
+    "logout": "Déconnexion"
+  },
+  "home": {
+    "hero_title": "Trouvez votre logement idéal",
+    "hero_subtitle": "La plateforme de location longue durée en Tunisie",
+    "search_placeholder": "Rechercher par ville, quartier, titre...",
+    "annonces_count": "{count} annonces disponibles",
+    "see_annonces": "Voir les annonces",
+    "publish": "Publier une annonce"
+  },
+  "filters": {
+    "all_cities": "Toutes les villes",
+    "all_types": "Tous les types",
+    "price_max": "Prix max",
+    "reset": "Réinitialiser",
+    "results": "{count} annonces trouvées"
+  },
+  "annonce": {
+    "rooms": "{count} pièces",
+    "see_details": "Voir détails",
+    "furnished": "Meublé",
+    "per_month": "/ mois",
+    "request_visit": "Demander une visite",
+    "contact": "Contacter le propriétaire",
+    "location": "Localisation",
+    "description": "Description",
+    "equipment": "Équipements"
+  },
+  "auth": {
+    "username": "Nom d'utilisateur",
+    "email": "Email",
+    "password": "Mot de passe",
+    "confirm_password": "Confirmer le mot de passe",
+    "phone": "Téléphone",
+    "role": "Je suis",
+    "owner": "Propriétaire",
+    "tenant": "Locataire",
+    "login_btn": "Se connecter",
+    "register_btn": "S'inscrire",
+    "forgot": "Mot de passe oublié?",
+    "no_account": "Pas de compte ?",
+    "have_account": "Vous avez un compte ?"
+  },
+  "dashboard": {
+    "overview": "Tableau de bord",
+    "my_annonces": "Mes annonces",
+    "visits": "Visites",
+    "contracts": "Contrats",
+    "messages": "Messages",
+    "favorites": "Favoris",
+    "profile": "Mon profil",
+    "users": "Utilisateurs",
+    "statistics": "Statistiques",
+    "disputes": "Litiges"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "view": "Voir",
+    "active": "Actif",
+    "suspended": "Suspendu",
+    "pending": "En attente",
+    "signed": "Signé",
+    "expired": "Expiré",
+    "generate": "Générer",
+    "download": "Télécharger"
+  }
+}

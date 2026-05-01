@@ -1,91 +1,97 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, ChevronLeft, Upload } from "lucide-react";
+import { Plus, ChevronLeft, Upload, X, ImageIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreerAnnonce } from "@/hooks/use-annonces";
+import api from "@/lib/api";
 import Link from "next/link";
 
 const EQUIPEMENTS_DISPONIBLES = [
-  "Climatisation",
-  "Ascenseur",
-  "Parking",
-  "Balcon",
-  "Cuisine équipée",
-  "Double vitrage",
-  "Meublé",
-  "Wifi inclus",
-  "Piscine",
-  "Jardin",
-  "Garage",
-  "Sécurité 24h",
-  "Chauffage central",
-  "Interphone",
-  "Digicode",
+  "Climatisation", "Ascenseur", "Parking", "Balcon",
+  "Cuisine équipée", "Double vitrage", "Meublé", "Wifi inclus",
+  "Piscine", "Jardin", "Garage", "Sécurité 24h",
+  "Chauffage central", "Interphone", "Digicode",
 ];
 
 export default function NouvelleAnnoncePage() {
-  const router = useRouter();
+  const router       = useRouter();
   const creerAnnonce = useCreerAnnonce();
-  const [step, setStep] = useState(1);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [step, setStep]         = useState(1);
   const [apiError, setApiError] = useState("");
+  const [images, setImages]     = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+
   const [form, setForm] = useState({
-    titre: "",
-    description: "",
-    type_bien: "",
-    ville: "",
-    adresse: "",
-    loyer: "",
-    caution: "",
-    surface: "",
-    nb_pieces: "",
-    etage: "",
+    titre: "", description: "", type_bien: "",
+    ville: "", adresse: "", loyer: "", caution: "",
+    surface: "", nb_pieces: "", etage: "",
     equipements: [] as string[],
-    images: [] as File[],
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const updateField = (field: string, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setErrors((prev) => ({ ...prev, [field]: "" }));
+    setForm(prev => ({ ...prev, [field]: value }));
+    setErrors(prev => ({ ...prev, [field]: "" }));
   };
 
   const toggleEquipement = (eq: string) => {
-    setForm((prev) => ({
+    setForm(prev => ({
       ...prev,
       equipements: prev.equipements.includes(eq)
-        ? prev.equipements.filter((e) => e !== eq)
+        ? prev.equipements.filter(e => e !== eq)
         : [...prev.equipements, eq],
     }));
   };
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const validFiles = files.filter(f => f.size <= 5 * 1024 * 1024);
+    if (validFiles.length < files.length) {
+      setApiError("Certaines images dépassent 5MB et ont été ignorées.");
+    }
+
+    setImages(prev => [...prev, ...validFiles]);
+    validFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreviews(prev => [...prev, e.target?.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeImage = (index: number) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
+    setPreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
   const validateStep1 = () => {
     const e: Record<string, string> = {};
-    if (!form.titre) e.titre = "Requis";
+    if (!form.titre)     e.titre = "Requis";
     if (!form.type_bien) e.type_bien = "Requis";
-    if (!form.ville) e.ville = "Requis";
-    if (!form.adresse) e.adresse = "Requis";
+    if (!form.ville)     e.ville = "Requis";
+    if (!form.adresse)   e.adresse = "Requis";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
   const validateStep2 = () => {
     const e: Record<string, string> = {};
-    if (!form.loyer) e.loyer = "Requis";
-    if (!form.surface) e.surface = "Requis";
+    if (!form.loyer)     e.loyer = "Requis";
+    if (!form.surface)   e.surface = "Requis";
     if (!form.nb_pieces) e.nb_pieces = "Requis";
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -96,41 +102,66 @@ export default function NouvelleAnnoncePage() {
     if (step === 2 && validateStep2()) setStep(3);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setApiError("");
-    creerAnnonce.mutate(
-      {
-        titre: form.titre,
-        description: form.description,
-        type_bien: form.type_bien,
-        ville: form.ville,
-        adresse: form.adresse,
-        loyer: form.loyer,
-        surface: form.surface,
-        nb_pieces: form.nb_pieces,
-      },
-      {
-        onSuccess: () => {
-          router.push("/proprietaire/annonces");
-        },
-        onError: (error: any) => {
-          const msg = error?.response?.data
-            ? JSON.stringify(error.response.data)
-            : "Erreur lors de la publication. Vérifiez que vous êtes connecté.";
-          setApiError(msg);
-        },
+    setUploading(true);
+
+    try {
+      // 1 — Créer l'annonce
+      const annonce: any = await new Promise((resolve, reject) => {
+        creerAnnonce.mutate(
+          {
+            titre:       form.titre,
+            description: form.description,
+            type_bien:   form.type_bien,
+            ville:       form.ville,
+            adresse:     form.adresse,
+            loyer:       form.loyer,
+            surface:     form.surface,
+            nb_pieces:   form.nb_pieces,
+          },
+          {
+            onSuccess: resolve,
+            onError:   reject,
+          }
+        );
+      });
+
+      // 2 — Upload images si existe
+      if (images.length > 0 && annonce?.id) {
+        for (const img of images) {
+          const formData = new FormData();
+          formData.append("image", img);
+          try {
+            await api.post(`/annonces/${annonce.id}/upload-image/`, formData, {
+              headers: { "Content-Type": "multipart/form-data" },
+            });
+          } catch {
+            // Continue even if image upload fails
+          }
+        }
       }
-    );
+
+      router.push("/proprietaire/annonces");
+    } catch (error: any) {
+      const msg = error?.response?.data
+        ? JSON.stringify(error.response.data)
+        : "Erreur lors de la publication. Vérifiez que vous êtes connecté.";
+      setApiError(msg);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const steps = [
     { n: 1, label: "Informations" },
     { n: 2, label: "Détails" },
-    { n: 3, label: "Équipements" },
+    { n: 3, label: "Photos & Équipements" },
   ];
 
   return (
     <div className="space-y-6 pb-10">
+
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" asChild>
           <Link href="/proprietaire/annonces">
@@ -139,40 +170,26 @@ export default function NouvelleAnnoncePage() {
         </Button>
         <div>
           <h1 className="text-2xl font-semibold">Nouvelle annonce</h1>
-          <p className="text-sm text-muted-foreground">
-            Publiez votre bien en quelques étapes
-          </p>
+          <p className="text-sm text-muted-foreground">Publiez votre bien en quelques étapes</p>
         </div>
       </div>
 
-      {/* Steps */}
+      {/* Steps indicator */}
       <div className="flex items-center gap-2">
         {steps.map((s, i) => (
           <div key={s.n} className="flex items-center gap-2 flex-1">
-            <div
-              className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium shrink-0 ${
-                step > s.n
-                  ? "bg-green-600 text-white"
-                  : step === s.n
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-secondary text-muted-foreground"
-              }`}
-            >
+            <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium shrink-0 ${
+              step > s.n   ? "bg-green-600 text-white" :
+              step === s.n ? "bg-primary text-primary-foreground" :
+                             "bg-secondary text-muted-foreground"
+            }`}>
               {step > s.n ? "✓" : s.n}
             </div>
-            <span
-              className={`text-sm ${
-                step === s.n ? "font-medium" : "text-muted-foreground"
-              }`}
-            >
+            <span className={`text-sm ${step === s.n ? "font-medium" : "text-muted-foreground"}`}>
               {s.label}
             </span>
             {i < steps.length - 1 && (
-              <div
-                className={`flex-1 h-px ${
-                  step > s.n ? "bg-green-600" : "bg-border"
-                }`}
-              />
+              <div className={`flex-1 h-px ${step > s.n ? "bg-green-600" : "bg-border"}`} />
             )}
           </div>
         ))}
@@ -181,30 +198,21 @@ export default function NouvelleAnnoncePage() {
       {/* Step 1 */}
       {step === 1 && (
         <Card>
-          <CardHeader>
-            <CardTitle>Informations générales</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle>Informations générales</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Titre *</Label>
               <Input
                 placeholder="Ex: Bel appartement 3 pièces - Lac 2"
                 value={form.titre}
-                onChange={(e) => updateField("titre", e.target.value)}
+                onChange={e => updateField("titre", e.target.value)}
               />
-              {errors.titre && (
-                <p className="text-xs text-destructive">{errors.titre}</p>
-              )}
+              {errors.titre && <p className="text-xs text-destructive">{errors.titre}</p>}
             </div>
             <div className="space-y-2">
               <Label>Type de bien *</Label>
-              <Select
-                value={form.type_bien}
-                onValueChange={(v) => updateField("type_bien", v)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Choisir le type" />
-                </SelectTrigger>
+              <Select value={form.type_bien} onValueChange={v => updateField("type_bien", v)}>
+                <SelectTrigger><SelectValue placeholder="Choisir le type" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="appartement">Appartement</SelectItem>
                   <SelectItem value="studio">Studio</SelectItem>
@@ -212,19 +220,12 @@ export default function NouvelleAnnoncePage() {
                   <SelectItem value="duplex">Duplex</SelectItem>
                 </SelectContent>
               </Select>
-              {errors.type_bien && (
-                <p className="text-xs text-destructive">{errors.type_bien}</p>
-              )}
+              {errors.type_bien && <p className="text-xs text-destructive">{errors.type_bien}</p>}
             </div>
             <div className="space-y-2">
               <Label>Ville *</Label>
-              <Select
-                value={form.ville}
-                onValueChange={(v) => updateField("ville", v)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Choisir la ville" />
-                </SelectTrigger>
+              <Select value={form.ville} onValueChange={v => updateField("ville", v)}>
+                <SelectTrigger><SelectValue placeholder="Choisir la ville" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Tunis">Tunis</SelectItem>
                   <SelectItem value="Ariana">Ariana</SelectItem>
@@ -234,20 +235,16 @@ export default function NouvelleAnnoncePage() {
                   <SelectItem value="Sousse">Sousse</SelectItem>
                 </SelectContent>
               </Select>
-              {errors.ville && (
-                <p className="text-xs text-destructive">{errors.ville}</p>
-              )}
+              {errors.ville && <p className="text-xs text-destructive">{errors.ville}</p>}
             </div>
             <div className="space-y-2">
               <Label>Adresse *</Label>
               <Input
                 placeholder="Ex: Rue du Lac Malaren"
                 value={form.adresse}
-                onChange={(e) => updateField("adresse", e.target.value)}
+                onChange={e => updateField("adresse", e.target.value)}
               />
-              {errors.adresse && (
-                <p className="text-xs text-destructive">{errors.adresse}</p>
-              )}
+              {errors.adresse && <p className="text-xs text-destructive">{errors.adresse}</p>}
             </div>
             <div className="space-y-2">
               <Label>Description</Label>
@@ -255,12 +252,10 @@ export default function NouvelleAnnoncePage() {
                 placeholder="Décrivez votre bien..."
                 rows={4}
                 value={form.description}
-                onChange={(e) => updateField("description", e.target.value)}
+                onChange={e => updateField("description", e.target.value)}
               />
             </div>
-            <Button className="w-full" onClick={handleNext}>
-              Suivant →
-            </Button>
+            <Button className="w-full" onClick={handleNext}>Suivant →</Button>
           </CardContent>
         </Card>
       )}
@@ -268,79 +263,43 @@ export default function NouvelleAnnoncePage() {
       {/* Step 2 */}
       {step === 2 && (
         <Card>
-          <CardHeader>
-            <CardTitle>Détails du bien</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle>Détails du bien</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Loyer (DT) *</Label>
-                <Input
-                  type="number"
-                  placeholder="900"
-                  value={form.loyer}
-                  onChange={(e) => updateField("loyer", e.target.value)}
-                />
-                {errors.loyer && (
-                  <p className="text-xs text-destructive">{errors.loyer}</p>
-                )}
+                <Input type="number" placeholder="900"
+                  value={form.loyer} onChange={e => updateField("loyer", e.target.value)} />
+                {errors.loyer && <p className="text-xs text-destructive">{errors.loyer}</p>}
               </div>
               <div className="space-y-2">
                 <Label>Caution (DT)</Label>
-                <Input
-                  type="number"
-                  placeholder="1800"
-                  value={form.caution}
-                  onChange={(e) => updateField("caution", e.target.value)}
-                />
+                <Input type="number" placeholder="1800"
+                  value={form.caution} onChange={e => updateField("caution", e.target.value)} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Surface (m²) *</Label>
-                <Input
-                  type="number"
-                  placeholder="85"
-                  value={form.surface}
-                  onChange={(e) => updateField("surface", e.target.value)}
-                />
-                {errors.surface && (
-                  <p className="text-xs text-destructive">{errors.surface}</p>
-                )}
+                <Input type="number" placeholder="85"
+                  value={form.surface} onChange={e => updateField("surface", e.target.value)} />
+                {errors.surface && <p className="text-xs text-destructive">{errors.surface}</p>}
               </div>
               <div className="space-y-2">
                 <Label>Pièces *</Label>
-                <Input
-                  type="number"
-                  placeholder="3"
-                  value={form.nb_pieces}
-                  onChange={(e) => updateField("nb_pieces", e.target.value)}
-                />
-                {errors.nb_pieces && (
-                  <p className="text-xs text-destructive">{errors.nb_pieces}</p>
-                )}
+                <Input type="number" placeholder="3"
+                  value={form.nb_pieces} onChange={e => updateField("nb_pieces", e.target.value)} />
+                {errors.nb_pieces && <p className="text-xs text-destructive">{errors.nb_pieces}</p>}
               </div>
             </div>
             <div className="space-y-2">
               <Label>Étage</Label>
-              <Input
-                type="number"
-                placeholder="0 = RDC"
-                value={form.etage}
-                onChange={(e) => updateField("etage", e.target.value)}
-              />
+              <Input type="number" placeholder="0 = RDC"
+                value={form.etage} onChange={e => updateField("etage", e.target.value)} />
             </div>
             <div className="flex gap-3">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => setStep(1)}
-              >
-                ← Retour
-              </Button>
-              <Button className="flex-1" onClick={handleNext}>
-                Suivant →
-              </Button>
+              <Button variant="outline" className="flex-1" onClick={() => setStep(1)}>← Retour</Button>
+              <Button className="flex-1" onClick={handleNext}>Suivant →</Button>
             </div>
           </CardContent>
         </Card>
@@ -349,125 +308,104 @@ export default function NouvelleAnnoncePage() {
       {/* Step 3 */}
       {step === 3 && (
         <div className="space-y-4">
+
+          {/* Upload Photos */}
           <Card>
-            <CardHeader>
-              <CardTitle>Équipements</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle>Photos du bien</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div
+                className="border-2 border-dashed rounded-xl p-8 text-center cursor-pointer hover:bg-accent transition-colors"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
+                <p className="font-medium text-sm">Cliquez pour ajouter des photos</p>
+                <p className="text-xs text-muted-foreground mt-1">JPG, PNG — max 5MB par image</p>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handleImageSelect}
+              />
+
+              {previews.length > 0 && (
+                <div className="grid grid-cols-3 gap-3">
+                  {previews.map((src, i) => (
+                    <div key={i} className="relative group">
+                      <img
+                        src={src}
+                        alt={`photo ${i + 1}`}
+                        className="h-28 w-full object-cover rounded-lg border"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(i)}
+                        className="absolute top-1 right-1 bg-destructive text-white rounded-full h-6 w-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                      {i === 0 && (
+                        <Badge className="absolute bottom-1 left-1 text-xs bg-primary">
+                          Photo principale
+                        </Badge>
+                      )}
+                    </div>
+                  ))}
+                  <div
+                    className="h-28 border-2 border-dashed rounded-lg flex items-center justify-center cursor-pointer hover:bg-accent transition-colors"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Plus className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                </div>
+              )}
+
+              {previews.length === 0 && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <ImageIcon className="h-4 w-4" />
+                  <span>Aucune photo ajoutée — les annonces avec photos reçoivent 3x plus de vues</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Équipements */}
+          <Card>
+            <CardHeader><CardTitle>Équipements</CardTitle></CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
                 {EQUIPEMENTS_DISPONIBLES.map((eq) => (
                   <Badge
                     key={eq}
-                    variant={
-                      form.equipements.includes(eq) ? "default" : "outline"
-                    }
+                    variant={form.equipements.includes(eq) ? "default" : "outline"}
                     className="cursor-pointer py-1.5 px-3 text-sm"
                     onClick={() => toggleEquipement(eq)}
                   >
-                    {form.equipements.includes(eq) && "✓ "}
-                    {eq}
+                    {form.equipements.includes(eq) && "✓ "}{eq}
                   </Badge>
                 ))}
               </div>
             </CardContent>
           </Card>
 
-          {/* Upload Images */}
+          {/* Récapitulatif */}
           <Card>
-            <CardHeader>
-              <CardTitle>Photos (optionnel)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div
-                className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:bg-accent transition-colors"
-                onClick={() => document.getElementById("image-upload")?.click()}
-              >
-                <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">
-                  Cliquez pour ajouter des photos
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  JPG, PNG — max 5MB par image
-                </p>
-              </div>
-              <input
-                id="image-upload"
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={(e) => {
-                  const files = Array.from(e.target.files || []);
-                  setForm((prev) => ({
-                    ...prev,
-                    images: [...(prev.images || []), ...files],
-                  }));
-                }}
-              />
-              {form.images && form.images.length > 0 && (
-                <div className="flex gap-2 mt-3 flex-wrap">
-                  {form.images.map((img: File, i: number) => (
-                    <div key={i} className="relative">
-                      <img
-                        src={URL.createObjectURL(img)}
-                        className="h-16 w-16 object-cover rounded-lg border"
-                        alt={`photo ${i + 1}`}
-                      />
-                      <button
-                        className="absolute -top-1 -right-1 bg-destructive text-white rounded-full h-4 w-4 text-xs flex items-center justify-center"
-                        onClick={() =>
-                          setForm((prev) => ({
-                            ...prev,
-                            images: prev.images?.filter(
-                              (_: File, idx: number) => idx !== i
-                            ),
-                          }))
-                        }
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Récapitulatif</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle>Récapitulatif</CardTitle></CardHeader>
             <CardContent className="space-y-2 text-sm">
               <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <span className="text-muted-foreground">Titre:</span>
-                  <p className="font-medium">{form.titre}</p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Type:</span>
-                  <p className="font-medium capitalize">{form.type_bien}</p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Ville:</span>
-                  <p className="font-medium">{form.ville}</p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Loyer:</span>
-                  <p className="font-medium">{form.loyer} DT</p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Surface:</span>
-                  <p className="font-medium">{form.surface} m²</p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Pièces:</span>
-                  <p className="font-medium">{form.nb_pieces}</p>
-                </div>
+                <div><span className="text-muted-foreground">Titre:</span><p className="font-medium">{form.titre}</p></div>
+                <div><span className="text-muted-foreground">Type:</span><p className="font-medium capitalize">{form.type_bien}</p></div>
+                <div><span className="text-muted-foreground">Ville:</span><p className="font-medium">{form.ville}</p></div>
+                <div><span className="text-muted-foreground">Loyer:</span><p className="font-medium">{form.loyer} DT</p></div>
+                <div><span className="text-muted-foreground">Surface:</span><p className="font-medium">{form.surface} m²</p></div>
+                <div><span className="text-muted-foreground">Pièces:</span><p className="font-medium">{form.nb_pieces}</p></div>
+                <div><span className="text-muted-foreground">Photos:</span><p className="font-medium">{images.length} photo(s)</p></div>
               </div>
             </CardContent>
           </Card>
 
-          {/* API Error */}
           {apiError && (
             <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
               {apiError}
@@ -475,21 +413,17 @@ export default function NouvelleAnnoncePage() {
           )}
 
           <div className="flex gap-3">
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => setStep(2)}
-            >
+            <Button variant="outline" className="flex-1" onClick={() => setStep(2)}>
               ← Retour
             </Button>
             <Button
-              style={{ backgroundColor: "#16a34a", color: "white" }}
               className="flex-1"
+              style={{ backgroundColor: "#16a34a", color: "white" }}
               onClick={handleSubmit}
-              disabled={creerAnnonce.isPending}
+              disabled={uploading}
             >
               <Plus className="mr-2 h-4 w-4" />
-              {creerAnnonce.isPending ? "Publication..." : "Publier l'annonce"}
+              {uploading ? "Publication en cours..." : "Publier l'annonce"}
             </Button>
           </div>
         </div>

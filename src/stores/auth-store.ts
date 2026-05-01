@@ -26,12 +26,15 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   setAuth: (user, accessToken, refreshToken) => {
     localStorage.setItem("access_token", accessToken);
     localStorage.setItem("refresh_token", refreshToken);
+    // حفظ في cookie للـ middleware
+    document.cookie = `access_token=${accessToken}; path=/; max-age=3600`;
     set({ user, accessToken });
   },
 
   logout: () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
+    document.cookie = "access_token=; path=/; max-age=0";
     set({ user: null, accessToken: null });
     window.location.href = "/login";
   },

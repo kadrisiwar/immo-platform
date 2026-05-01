@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/api";
+import { toast } from "sonner";
 
 export interface Visite {
   id: number;
@@ -51,8 +52,12 @@ export function useDemanderVisite() {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["visites-locataire"] });
-    },
+  queryClient.invalidateQueries({ queryKey: ["visites-locataire"] });
+  toast.success("Demande de visite envoyée!");
+},
+onError: () => {
+  toast.error("Erreur. Vérifiez que vous êtes connecté en tant que locataire.");
+},
   });
 }
 
@@ -64,8 +69,12 @@ export function useGererVisite() {
       const res = await api.patch(`/visites/${id}/gerer/`, { status });
       return res.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["visites-proprietaire"] });
-    },
+    onSuccess: (data) => {
+  queryClient.invalidateQueries({ queryKey: ["visites-proprietaire"] });
+  toast.success(data.status === "confirmee" ? "Visite confirmée!" : "Visite annulée.");
+},
+onError: () => {
+  toast.error("Erreur lors de la mise à jour.");
+},
   });
 }
