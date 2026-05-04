@@ -1,27 +1,39 @@
 {
   "nav": {
-    "search": "بحث",
     "login": "تسجيل الدخول",
     "register": "إنشاء حساب",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "search": "بحث"
   },
   "home": {
     "hero_title": "اعثر على منزلك المثالي",
     "hero_subtitle": "منصة الإيجار طويل الأمد في تونس",
     "search_placeholder": "ابحث بالمدينة أو الحي أو العنوان...",
-    "annonces_count": "{count} إعلان متاح",
+    "annonces_count": "إعلان متاح",
     "see_annonces": "عرض الإعلانات",
-    "publish": "نشر إعلان"
+    "publish": "نشر إعلان",
+    "why_title": "لماذا تختار إيمو بلات؟",
+    "ready": "هل أنت مستعد للبدء؟",
+    "join": "انضم إلى آلاف المستخدمين",
+    "free_account": "إنشاء حساب مجاني"
   },
   "filters": {
     "all_cities": "كل المدن",
     "all_types": "كل الأنواع",
     "price_max": "أقصى سعر",
     "reset": "إعادة تعيين",
-    "results": "{count} إعلان وجد"
+    "results": "إعلان وجد",
+    "filters": "فلاتر",
+    "city": "المدينة",
+    "type": "نوع العقار",
+    "rooms": "عدد الغرف",
+    "all": "الكل",
+    "furnished": "مفروش",
+    "not_furnished": "غير مفروش",
+    "equipment": "المعدات"
   },
   "annonce": {
-    "rooms": "{count} غرف",
+    "rooms": "غرف",
     "see_details": "عرض التفاصيل",
     "furnished": "مفروش",
     "per_month": "/ الشهر",
@@ -29,17 +41,29 @@
     "contact": "التواصل مع المالك",
     "location": "الموقع",
     "description": "الوصف",
-    "equipment": "المعدات"
+    "equipment": "المعدات",
+    "owner": "المالك",
+    "published": "نُشر في",
+    "confirm_visit": "تأكيد الطلب",
+    "visit_sent": "تم إرسال الطلب!",
+    "visit_sent_desc": "سيتصل بك المالك قريباً.",
+    "my_visits": "زياراتي",
+    "no_slot": "لا توجد مواعيد محددة — اقترح موعدك",
+    "choose_slot": "اختر موعداً متاحاً",
+    "date_souhaitee": "التاريخ والوقت المرغوبان",
+    "message_optional": "رسالة (اختياري)",
+    "present_yourself": "قدم نفسك باختصار..."
   },
   "auth": {
     "username": "اسم المستخدم",
+    "username_or_email": "اسم المستخدم أو البريد الإلكتروني",
     "email": "البريد الإلكتروني",
     "password": "كلمة المرور",
     "confirm_password": "تأكيد كلمة المرور",
     "phone": "الهاتف",
-    "role": "أنا",
-    "owner": "مالك",
-    "tenant": "مستأجر",
+    "iam": "أنا",
+    "owner": "🏠 مالك",
+    "tenant": "🔑 مستأجر",
     "login_btn": "تسجيل الدخول",
     "register_btn": "إنشاء حساب",
     "forgot": "نسيت كلمة المرور؟",
@@ -56,7 +80,9 @@
     "profile": "ملفي الشخصي",
     "users": "المستخدمون",
     "statistics": "الإحصائيات",
-    "disputes": "النزاعات"
+    "disputes": "النزاعات",
+    "new_annonce": "إعلان جديد",
+    "settings": "الإعدادات"
   },
   "common": {
     "loading": "جارٍ التحميل...",
@@ -71,6 +97,13 @@
     "signed": "موقّع",
     "expired": "منتهي",
     "generate": "إنشاء",
-    "download": "تحميل"
+    "download": "تحميل",
+    "print": "طباعة",
+    "back": "رجوع",
+    "next": "التالي",
+    "confirm": "تأكيد",
+    "send": "إرسال",
+    "no_result": "لا توجد نتائج",
+    "error": "خطأ"
   }
 }

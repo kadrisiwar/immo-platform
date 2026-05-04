@@ -1,56 +1,34 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Globe } from "lucide-react";
-import { getLocale, setLocale, type Locale } from "@/lib/locale";
+import { useI18n } from "@/hooks/use-i18n";
 
 const LANGUAGES = [
-  { code: "fr", label: "Français",  flag: "🇫🇷" },
-  { code: "ar", label: "العربية",   flag: "🇹🇳" },
-  { code: "en", label: "English",   flag: "🇬🇧" },
+  { code: "fr", label: "Français", flag: "🇫🇷" },
+  { code: "ar", label: "العربية", flag: "🇹🇳" },
+  { code: "en", label: "English", flag: "🇬🇧" },
 ];
 
 export function LanguageSwitcher() {
-  const [current, setCurrent] = useState<Locale>("fr");
+  const { locale, changeLocale, loaded } = useI18n();
 
-  useEffect(() => {
-    setCurrent(getLocale());
-  }, []);
-
-  const handleChange = (locale: Locale) => {
-    setCurrent(locale);
-    setLocale(locale);
-  };
-
-  const currentLang = LANGUAGES.find(l => l.code === current);
+  if (!loaded) return null; // لا نعرض الزر حتى تكتمل الترجمة
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="gap-2">
-          <Globe className="h-4 w-4" />
-          <span>{currentLang?.flag} {currentLang?.label}</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        {LANGUAGES.map(lang => (
-          <DropdownMenuItem
-            key={lang.code}
-            onClick={() => handleChange(lang.code as Locale)}
-            className={current === lang.code ? "font-bold bg-accent" : ""}
-          >
-            <span className="mr-2 text-lg">{lang.flag}</span>
-            {lang.label}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex gap-2">
+      {LANGUAGES.map(lang => (
+        <button
+          key={lang.code}
+          onClick={() => changeLocale(lang.code as any)}
+          className={`px-3 py-1 rounded-full text-sm transition-colors ${
+            locale === lang.code
+              ? "bg-primary text-primary-foreground"
+              : "bg-secondary hover:bg-secondary/80"
+          }`}
+        >
+          <span className="mr-1">{lang.flag}</span>
+          {lang.label}
+        </button>
+      ))}
+    </div>
   );
 }

@@ -1,27 +1,39 @@
 {
   "nav": {
-    "search": "Rechercher",
     "login": "Se connecter",
     "register": "S'inscrire",
-    "logout": "Déconnexion"
+    "logout": "Déconnexion",
+    "search": "Rechercher"
   },
   "home": {
     "hero_title": "Trouvez votre logement idéal",
     "hero_subtitle": "La plateforme de location longue durée en Tunisie",
     "search_placeholder": "Rechercher par ville, quartier, titre...",
-    "annonces_count": "{count} annonces disponibles",
+    "annonces_count": "annonces disponibles",
     "see_annonces": "Voir les annonces",
-    "publish": "Publier une annonce"
+    "publish": "Publier une annonce",
+    "why_title": "Pourquoi choisir ImmoPlat?",
+    "ready": "Prêt à commencer?",
+    "join": "Rejoignez des milliers d'utilisateurs",
+    "free_account": "Créer un compte gratuit"
   },
   "filters": {
     "all_cities": "Toutes les villes",
     "all_types": "Tous les types",
     "price_max": "Prix max",
     "reset": "Réinitialiser",
-    "results": "{count} annonces trouvées"
+    "results": "annonces trouvées",
+    "filters": "Filtres",
+    "city": "Ville",
+    "type": "Type de bien",
+    "rooms": "Nombre de pièces",
+    "all": "Tous",
+    "furnished": "Meublé",
+    "not_furnished": "Non meublé",
+    "equipment": "Équipements"
   },
   "annonce": {
-    "rooms": "{count} pièces",
+    "rooms": "pièces",
     "see_details": "Voir détails",
     "furnished": "Meublé",
     "per_month": "/ mois",
@@ -29,17 +41,29 @@
     "contact": "Contacter le propriétaire",
     "location": "Localisation",
     "description": "Description",
-    "equipment": "Équipements"
+    "equipment": "Équipements",
+    "owner": "Propriétaire",
+    "published": "Publié le",
+    "confirm_visit": "Confirmer la demande",
+    "visit_sent": "Demande envoyée!",
+    "visit_sent_desc": "Le propriétaire vous contactera bientôt.",
+    "my_visits": "Voir mes visites",
+    "no_slot": "Aucun créneau prédéfini — proposez votre date",
+    "choose_slot": "Choisir un créneau disponible",
+    "date_souhaitee": "Date et heure souhaitées",
+    "message_optional": "Message (optionnel)",
+    "present_yourself": "Présentez-vous brièvement..."
   },
   "auth": {
     "username": "Nom d'utilisateur",
+    "username_or_email": "Nom d'utilisateur ou email",
     "email": "Email",
     "password": "Mot de passe",
     "confirm_password": "Confirmer le mot de passe",
     "phone": "Téléphone",
-    "role": "Je suis",
-    "owner": "Propriétaire",
-    "tenant": "Locataire",
+    "iam": "Je suis",
+    "owner": "🏠 Propriétaire",
+    "tenant": "🔑 Locataire",
     "login_btn": "Se connecter",
     "register_btn": "S'inscrire",
     "forgot": "Mot de passe oublié?",
@@ -56,7 +80,9 @@
     "profile": "Mon profil",
     "users": "Utilisateurs",
     "statistics": "Statistiques",
-    "disputes": "Litiges"
+    "disputes": "Litiges",
+    "new_annonce": "Nouvelle annonce",
+    "settings": "Paramètres"
   },
   "common": {
     "loading": "Chargement...",
@@ -71,6 +97,13 @@
     "signed": "Signé",
     "expired": "Expiré",
     "generate": "Générer",
-    "download": "Télécharger"
+    "download": "Télécharger",
+    "print": "Imprimer",
+    "back": "Retour",
+    "next": "Suivant",
+    "confirm": "Confirmer",
+    "send": "Envoyer",
+    "no_result": "Aucun résultat",
+    "error": "Erreur"
   }
 }

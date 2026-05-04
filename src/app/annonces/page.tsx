@@ -15,6 +15,7 @@ import Link from "next/link";
 import { MapView } from "@/components/shared/MapView";
 import { Map, List } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import { SkeletonAnnoncesGrid } from "@/components/shared/SkeletonCard";
 
 const PER_PAGE = 9;
 
@@ -48,13 +49,16 @@ export default function AnnoncesPage() {
   const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   const toggleFavorite = (id: number) => {
-    const saved = JSON.parse(localStorage.getItem("favoris") || "[]");
-    const newFavoris = saved.includes(id)
-      ? saved.filter((f: number) => f !== id)
-      : [...saved, id];
-    localStorage.setItem("favoris", JSON.stringify(newFavoris));
-    setFavorites(newFavoris);
-  };
+  const saved = JSON.parse(localStorage.getItem("favoris") || "[]");
+  let newFavoris;
+  if (saved.includes(id)) {
+    newFavoris = saved.filter((f: number) => f !== id);
+  } else {
+    newFavoris = [...saved, id];
+  }
+  localStorage.setItem("favoris", JSON.stringify(newFavoris));
+  setFavorites(newFavoris);
+};
 
   const resetFiltres = () => {
     setSearch("");
@@ -72,11 +76,20 @@ export default function AnnoncesPage() {
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="text-xl font-bold">🏠 ImmoPlat</Link>
           <div className="flex gap-2">
-            <Button variant="outline" asChild><Link href="/login">Se connecter</Link></Button>
-            <Button asChild><Link href="/register">S&apos;inscrire</Link></Button>
-          </div>
-        </div>
-      </header>
+            <Button variant="outline" asChild>
+              <Link href="/locataire/favoris">
+          ❤️ Mes favoris
+        </Link>
+      </Button>
+      <Button variant="outline" asChild>
+        <Link href="/login">Se connecter</Link>
+      </Button>
+      <Button asChild>
+        <Link href="/register">S'inscrire</Link>
+      </Button>
+    </div>
+  </div>
+</header>
 
       {/* Hero */}
       <div className="bg-primary/5 border-b py-8">
@@ -248,19 +261,7 @@ export default function AnnoncesPage() {
   </>
 )}
 
-            {isLoading && (
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {[...Array(6)].map((_, i) => (
-                  <Card key={i} className="overflow-hidden">
-                    <div className="h-48 bg-secondary animate-pulse" />
-                    <CardContent className="p-4 space-y-3">
-                      <div className="h-4 bg-secondary rounded animate-pulse" />
-                      <div className="h-3 bg-secondary rounded w-2/3 animate-pulse" />
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
+            {isLoading && <SkeletonAnnoncesGrid count={6} />}
 
             {isError && (
               <EmptyState
@@ -312,12 +313,13 @@ export default function AnnoncesPage() {
     </Badge>
   )}
   <Button
-    variant="ghost" size="icon"
-    className="absolute top-2 right-2 bg-white/80 hover:bg-white"
-    onClick={(e) => { e.preventDefault(); toggleFavorite(a.id); }}
-  >
-    <Heart className={`h-4 w-4 ${favorites.includes(a.id) ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
-  </Button>
+  variant="ghost"
+  size="icon"
+  className="absolute top-2 right-2 bg-white/80 hover:bg-white"
+  onClick={() => toggleFavorite(a.id)}
+>
+  <Heart className={`h-4 w-4 ${favorites.includes(a.id) ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
+</Button>
 </div>
 
                       <CardContent className="p-4 space-y-3">

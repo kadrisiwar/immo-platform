@@ -18,9 +18,17 @@ import {
   DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { useNotifications } from "@/hooks/use-notifications";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
 
 type Role = "admin" | "proprietaire" | "locataire";
 
@@ -39,14 +47,14 @@ const NAV: Record<Role, { label: string; href: string; icon: any; badge?: number
     { label: "Visites",         href: "/proprietaire/visites",       icon: CalendarCheck },
     { label: "Contrats",        href: "/proprietaire/contrats",      icon: FileText },
     { label: "Messages",        href: "/proprietaire/messages",      icon: MessageSquare },
+    { label: "Statistiques",    href: "/proprietaire/statistiques",  icon: BarChart3 },
   ],
   locataire: [
     { label: "Tableau de bord", href: "/locataire",          icon: LayoutDashboard },
     { label: "Mes visites",     href: "/locataire/visites",  icon: CalendarCheck },
     { label: "Favoris",         href: "/locataire/favoris",  icon: Heart },
     { label: "Contrats",        href: "/locataire/contrats", icon: FileText },
-    { label: "Messages",        href: "/locataire/messages", icon: MessageSquare },  // ← زيد
-
+    { label: "Messages",        href: "/locataire/messages", icon: MessageSquare },
   ],
 };
 
@@ -138,17 +146,19 @@ function SidebarContent({ role, collapsed, onToggle }: {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              className="text-destructive"
-              onClick={() => {
-                localStorage.removeItem("access_token");
-                localStorage.removeItem("refresh_token");
-                document.cookie = "access_token=; path=/; max-age=0";
-                window.location.href = "/login";
-              }}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Déconnexion
-            </DropdownMenuItem>
+  className="text-destructive"
+  onClick={() => {
+    // Supprimer localStorage
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    // Supprimer cookie
+    document.cookie = "access_token=; path=/; max-age=0; SameSite=Lax";
+    window.location.href = "/login";
+  }}
+>
+  <LogOut className="mr-2 h-4 w-4" />
+  Déconnexion
+</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -192,22 +202,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-64 p-0">
-              <SidebarContent role={role} collapsed={false} onToggle={() => {}} />
+              <div className="flex h-full flex-col">
+                <div className="p-4 border-b">
+                  <span className="text-lg font-semibold">
+                    {role === "admin" ? "🏢 Admin" : "🏠 ImmoPlat"}
+                  </span>
+                </div>
+                <div className="flex-1 overflow-y-auto">
+                  <SidebarContent role={role} collapsed={false} onToggle={() => {}} />
+                </div>
+              </div>
             </SheetContent>
           </Sheet>
 
           <div className="flex-1" />
+          <ThemeToggle />
 
           {/* Notifications dropdown */}
           <DropdownMenu onOpenChange={(open) => open && refetch()}>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
-                {nonLus > 0 && (
-                  <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] text-white font-bold">
-                    {nonLus > 9 ? "9+" : nonLus}
-                  </span>
-                )}
+                <div className="relative">
+                  <Bell className="h-5 w-5" />
+                  {nonLus > 0 && (
+                    <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] text-white font-bold">
+                      {nonLus > 9 ? "9+" : nonLus}
+                    </span>
+                  )}
+                </div>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80">
@@ -232,25 +254,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <DropdownMenuItem key={n.id} className="flex items-start gap-3 p-3 cursor-default">
                       <NotificationIcon type={n.type} />
                       <div className="flex-1 min-w-0">
-                        <p className={cn(
-                          "text-xs leading-tight",
-                          !n.lu && "font-semibold"
-                        )}>
+                        <p className={cn("text-xs leading-tight", !n.lu && "font-semibold")}>
                           {n.message}
                         </p>
                         <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
                           <Clock className="h-3 w-3" />
                           {new Date(n.date).toLocaleString("fr-TN", {
-                            day:    "2-digit",
-                            month:  "2-digit",
-                            hour:   "2-digit",
+                            day: "2-digit",
+                            month: "2-digit",
+                            hour: "2-digit",
                             minute: "2-digit",
                           })}
                         </div>
                       </div>
-                      {!n.lu && (
-                        <div className="h-2 w-2 rounded-full bg-primary shrink-0 mt-1" />
-                      )}
+                      {!n.lu && <div className="h-2 w-2 rounded-full bg-primary shrink-0 mt-1" />}
                     </DropdownMenuItem>
                   ))}
                 </div>

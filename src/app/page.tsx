@@ -30,23 +30,33 @@ export default function LandingPage() {
 
       {/* Header */}
       <header className="border-b bg-card sticky top-0 z-10">
-  <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-    <span className="text-xl font-bold">🏠 ImmoPlat</span>
-    <div className="flex items-center gap-3">
-      <GoogleTranslate />
-      <Button variant="outline" asChild>
-        <Link href="/login">Se connecter</Link>
-      </Button>
-      <Button asChild>
-        <Link href="/register">S&apos;inscrire</Link>
-      </Button>
-    </div>
-  </div>
-</header>
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <span className="text-xl font-bold">🏠 ImmoPlat</span>
+          <div className="flex items-center gap-3">
+            
+            <Button variant="outline" asChild>
+              <Link href="/login">Se connecter</Link>
+            </Button>
+            <Button asChild>
+              <Link href="/register">S&apos;inscrire</Link>
+            </Button>
+          </div>
+        </div>
+      </header>
 
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-primary/10 to-primary/5 py-20">
-        <div className="max-w-7xl mx-auto px-4 text-center">
+      {/* Hero avec image de fond */}
+      <section className="relative bg-gradient-to-br from-primary/10 to-primary/5 py-20 overflow-hidden">
+        {/* Image de fond */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=2073"
+            alt="Tunisie"
+            className="w-full h-full object-cover opacity-30"
+          />
+        </div>
+        
+        {/* Contenu (inchangé) */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 text-center">
           <h1 className="text-5xl font-bold mb-4">
             <T k="home.hero_title" /><br/>
             <span className="text-primary">en Tunisie</span>

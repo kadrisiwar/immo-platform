@@ -32,7 +32,10 @@ export default function LoginPage() {
       // Étape 2 — Save tokens
       localStorage.setItem("access_token",  access);
       localStorage.setItem("refresh_token", refresh);
-      document.cookie = `access_token=${access}; path=/; max-age=3600`;
+      
+      // Save في cookie pour middleware
+    const maxAge = 3600;
+    document.cookie = `access_token=${access}; path=/; max-age=${maxAge}; SameSite=Lax`;
 
       // Étape 3 — Get user info + role
       const meRes = await api.get("/accounts/me/", {
@@ -74,7 +77,7 @@ export default function LoginPage() {
               <Label htmlFor="username">Nom d&apos;utilisateur</Label>
               <Input
                 id="username"
-                placeholder="username ou email@exemple.com"
+                placeholder="username"
                 value={form.username}
                 onChange={e => setForm({ ...form, username: e.target.value })}
                 required
